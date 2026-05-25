@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Readi · AI Readiness Diagnostic</title>
+<meta name="description" content="Ready is a myth. Readi is a practice. Take the 7-question diagnostic.">
+<meta property="og:title" content="Readi · AI Readiness Diagnostic">
+<meta property="og:description" content="Where do you actually stand with AI? Find your tier in 7 questions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0c0e;
+    --bg-2:#16161a;
+    --bg-3:#1c1c22;
+    --ink:#f3ecdf;
+    --ink-dim:#8a857a;
+    --line:#26262c;
+    --accent:#d4ff3f;
+    --accent-2:#7cf2c0;
+    --warn:#ff5a36;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Fraunces',Georgia,serif;
+    font-feature-settings:"ss01","ss02";
+    position:relative;
+    min-height:100vh;
+    line-height:1.5;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 3px);
+    mix-blend-mode:overlay;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(ellipse at 50% 0%,rgba(212,255,63,.06),transparent 60%),
+               radial-gradient(ellipse at 80% 100%,rgba(124,242,192,.04),transparent 50%);
+  }
+
+  .stage{
+    position:relative;z-index:3;
+    min-height:100vh;
+    display:flex;flex-direction:column;
+    max-width:760px;margin:0 auto;
+    padding:18px 22px 36px;
+  }
+
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-dim);
+    padding-bottom:14px;border-bottom:1px solid var(--line);
+  }
+  .brand{font-weight:700;color:var(--ink);font-family:'Fraunces',serif;font-style:italic;font-size:18px;letter-spacing:-.01em;text-transform:none}
+  .brand .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:8px;box-shadow:0 0 10px var(--accent);vertical-align:middle}
+  .progress{display:flex;gap:4px}
+  .pip{width:18px;height:3px;background:var(--line);border-radius:2px}
+  .pip.done{background:var(--ink)}
+  .pip.active{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+
+  .screen{flex:1;display:flex;flex-direction:column;justify-content:center;animation:fadeUp .5s ease both;padding:32px 0}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  /* START */
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-dim);margin-bottom:22px;
+  }
+  .title{
+    font-weight:900;font-size:clamp(54px,11vw,96px);line-height:.92;letter-spacing:-.035em;
+    margin-bottom:24px;
+  }
+  .title em{font-style:italic;font-weight:500;color:var(--accent)}
+  .lede{
+    font-size:18px;line-height:1.5;color:var(--ink);opacity:.88;
+    max-width:48ch;margin-bottom:36px;font-weight:300;
+  }
+
+  .tiers-preview{
+    display:flex;flex-direction:column;gap:12px;margin-bottom:36px;
+  }
+  .tier-card{
+    background:var(--bg-2);border:1px solid var(--line);
+    border-radius:6px;padding:16px 18px;
+    display:flex;align-items:flex-start;gap:14px;
+  }
+  .tier-icon{
+    font-size:22px;line-height:1;flex-shrink:0;margin-top:2px;
+  }
+  .tier-info h3{
+    font-weight:500;font-size:17px;letter-spacing:-.005em;margin-bottom:3px;color:var(--ink);
+  }
+  .tier-info p{font-size:13.5px;line-height:1.4;opacity:.7;font-weight:300}
+
+  .meta-row{
+    display:flex;gap:22px;margin-bottom:28px;flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);
+  }
+  .meta-row span b{color:var(--ink);font-weight:500;margin-right:6px}
+
+  .btn{
+    appearance:none;border:none;cursor:pointer;text-decoration:none;
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;
+    padding:18px 24px;border-radius:4px;
+    background:var(--accent);color:#0a0a0a;
+    display:inline-flex;align-items:center;justify-content:center;gap:14px;
+    transition:transform .15s ease,filter .15s ease;
+    width:fit-content;
+  }
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.05)}
+  .btn:active{transform:translateY(0)}
+  .btn .arr{font-size:18px;line-height:1}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:var(--ink);transform:translateY(-2px);filter:none}
+
+  /* QUESTION */
+  .q-label{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:14px;
+  }
+  .q-prompt{
+    font-size:clamp(22px,4.5vw,30px);line-height:1.25;font-weight:500;letter-spacing:-.01em;
+    margin-bottom:24px;
+  }
+  .q-prompt em{font-style:italic;color:var(--accent);font-weight:500}
+
+  .options{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+  .opt{
+    appearance:none;border:1px solid var(--line);background:transparent;color:var(--ink);
+    text-align:left;padding:16px 18px;border-radius:4px;cursor:pointer;
+    font-family:'Fraunces',serif;font-size:16px;line-height:1.4;font-weight:300;
+    display:flex;align-items:flex-start;gap:14px;
+    transition:border-color .15s,background .15s,transform .1s;
+  }
+  .opt:hover{border-color:var(--ink);background:rgba(255,255,255,.02)}
+  .opt.selected{border-color:var(--accent);background:rgba(212,255,63,.05)}
+  .opt .key{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.1em;
+    color:var(--ink-dim);background:var(--line);padding:4px 8px;border-radius:2px;flex-shrink:0;margin-top:2px;
+  }
+  .opt.selected .key{background:var(--accent);color:#0a0a0a}
+
+  .footer-row{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:14px;flex-wrap:wrap}
+  .q-counter{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim)}
+  .q-counter b{color:var(--ink);font-weight:700}
+
+  /* RESULT */
+  .result-eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-dim);margin-bottom:12px;
+  }
+  .result-tier-name{
+    font-weight:900;font-size:clamp(64px,14vw,120px);line-height:.9;letter-spacing:-.04em;
+    color:var(--accent);margin-bottom:8px;
+  }
+  .result-tier-icon{font-size:48px;margin-bottom:18px;line-height:1}
+  .result-tagline{
+    font-style:italic;font-weight:500;font-size:clamp(22px,4vw,30px);margin-bottom:16px;line-height:1.2;
+  }
+  .result-blurb{font-size:16.5px;line-height:1.55;opacity:.88;font-weight:300;margin-bottom:30px;max-width:52ch}
+
+  .improve-head{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-dim);margin-bottom:14px;padding-top:24px;border-top:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;
+  }
+  .improve-head::before{content:"";width:14px;height:1px;background:var(--accent)}
+
+  .improve-list{display:grid;gap:14px;margin-bottom:8px}
+  .improve-item{
+    display:flex;gap:16px;align-items:flex-start;
+    background:var(--bg-2);border:1px solid var(--line);
+    padding:16px 18px;border-radius:4px;
+  }
+  .improve-num{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;
+    color:var(--accent);background:rgba(212,255,63,.1);padding:4px 8px;border-radius:2px;flex-shrink:0;
+  }
+  .improve-text{font-size:14.5px;line-height:1.5;font-weight:300;color:var(--ink);opacity:.92}
+  .improve-text b{font-weight:500;color:var(--ink);opacity:1}
+
+  .result-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+
+  .hidden{display:none !important}
+
+  @media (max-width:480px){
+    .stage{padding:14px 16px 28px}
+    .pip{width:14px}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span>readi</div>
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <!-- START -->
+  <section class="screen" id="screen-start">
+    <div class="eyebrow">// AI Readiness Diagnostic</div>
+    <h1 class="title">Ready is a myth.<br><em>Readi</em> is a practice.</h1>
+    <p class="lede">None of us are fully ready for AI. Take the 7-question diagnostic to find your tier — and a clear set of moves to level up from where you actually are.</p>
+
+    <div class="tiers-preview">
+      <div class="tier-card">
+        <div class="tier-icon">🌱</div>
+        <div class="tier-info">
+          <h3>Foundation</h3>
+          <p>Build daily reps. Develop verification habits. Get the fundamentals right.</p>
+        </div>
+      </div>
+      <div class="tier-card">
+        <div class="tier-icon">⚡</div>
+        <div class="tier-info">
+          <h3>Builder</h3>
+          <p>Move from one-shot prompts to multi-turn work. Build personal prompt libraries.</p>
+        </div>
+      </div>
+      <div class="tier-card">
+        <div class="tier-icon">🚀</div>
+        <div class="tier-info">
+          <h3>Operator</h3>
+          <p>Redesign workflows. Teach others. Govern AI use across the team.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta-row">
+      <span><b>07</b> Questions</span>
+      <span><b>~3</b> Min</span>
+      <span><b>00</b> Lectures</span>
+    </div>
+
+    <button class="btn" onclick="start()">Start Diagnostic <span class="arr">→</span></button>
+  </section>
+
+  <!-- QUESTION -->
+  <section class="screen hidden" id="screen-question">
+    <div class="q-label" id="q-label"></div>
+    <h2 class="q-prompt" id="q-prompt"></h2>
+    <div class="options" id="options"></div>
+    <div class="footer-row">
+      <div class="q-counter">Question <b id="q-current">1</b> of <span id="q-total">7</span></div>
+      <button class="btn hidden" id="next-btn" onclick="nextQuestion()">Next <span class="arr">→</span></button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen hidden" id="screen-result">
+    <div class="result-eyebrow">// Your Tier</div>
+    <div class="result-tier-icon" id="result-icon"></div>
+    <div class="result-tier-name" id="result-name"></div>
+    <div class="result-tagline" id="result-tagline"></div>
+    <p class="result-blurb" id="result-blurb"></p>
+
+    <div class="improve-head">How to level up from here</div>
+    <div class="improve-list" id="improve-list"></div>
+
+    <div class="result-actions">
+      <button class="btn" onclick="restart()">Retake <span class="arr">↻</span></button>
+      <button class="btn ghost" onclick="shareResult()">Share <span class="arr">↗</span></button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    label: "Question 01 · Frequency",
+    prompt: "How often do you use AI tools in your actual work?",
+    options: [
+      { key:"A", text:"Rarely — maybe a few times a month", points:0 },
+      { key:"B", text:"Weekly — for specific tasks", points:1 },
+      { key:"C", text:"Daily — it's part of my regular workflow", points:2 },
+      { key:"D", text:"Constantly — multiple times a day, across most tasks", points:3 },
+    ]
+  },
+  {
+    label: "Question 02 · Prompting",
+    prompt: "When you ask AI for something, how do you typically structure it?",
+    options: [
+      { key:"A", text:"Short, conversational — like asking a friend", points:0 },
+      { key:"B", text:"I add some context about what I'm trying to do", points:1 },
+      { key:"C", text:"I specify audience, format, tone, and constraints", points:2 },
+      { key:"D", text:"I use multi-turn refinement and save prompts I can reuse", points:3 },
+    ]
+  },
+  {
+    label: "Question 03 · Verification",
+    prompt: "When AI gives you an answer with specific facts, dates, or names — what do you do?",
+    options: [
+      { key:"A", text:"Trust it if it sounds confident", points:0 },
+      { key:"B", text:"Sometimes double-check the important parts", points:1 },
+      { key:"C", text:"Always verify any specific claim before I act on it", points:2 },
+      { key:"D", text:"Verify, and I've trained colleagues to do the same", points:3 },
+    ]
+  },
+  {
+    label: "Question 04 · Data Hygiene",
+    prompt: "How do you handle confidential or sensitive information when using AI?",
+    options: [
+      { key:"A", text:"I haven't really thought about this", points:0 },
+      { key:"B", text:"I avoid pasting obvious things like client names", points:1 },
+      { key:"C", text:"I only use approved tools for work data and follow our policy", points:2 },
+      { key:"D", text:"I help set the policy and govern AI use across my team", points:3 },
+    ]
+  },
+  {
+    label: "Question 05 · Detection",
+    prompt: "Can you reliably tell when something was written by AI?",
+    options: [
+      { key:"A", text:"Not really — it all reads about the same to me", points:0 },
+      { key:"B", text:"Sometimes — if it's really obvious", points:1 },
+      { key:"C", text:"Usually — I notice the patterns (hedge words, generic structure)", points:2 },
+      { key:"D", text:"Yes, and I can coach others on what to look for", points:3 },
+    ]
+  },
+  {
+    label: "Question 06 · Workflow",
+    prompt: "Have you redesigned any of your work to use AI as part of the process?",
+    options: [
+      { key:"A", text:"No — I use AI for one-off tasks when I think of it", points:0 },
+      { key:"B", text:"A little — I have a few go-to use cases", points:1 },
+      { key:"C", text:"Yes — several of my workflows are built around AI", points:2 },
+      { key:"D", text:"I've redesigned team-level workflows and trained others on them", points:3 },
+    ]
+  },
+  {
+    label: "Question 07 · Leadership",
+    prompt: "When it comes to leading others through AI adoption — where are you?",
+    options: [
+      { key:"A", text:"I'm focused on my own learning right now", points:0 },
+      { key:"B", text:"I help colleagues informally when they ask", points:1 },
+      { key:"C", text:"I run sessions or share resources with my team regularly", points:2 },
+      { key:"D", text:"I set the AI strategy or governance approach for my org or function", points:3 },
+    ]
+  },
+];
+
+const TIERS = {
+  foundation: {
+    name: "Foundation",
+    icon: "🌱",
+    tagline: "You're at the starting line — and that's okay.",
+    blurb: "You've started using AI but it's still occasional, ad hoc, and you're not yet confident steering it. This is exactly where most professionals are right now. The good news: the jump from Foundation to Builder is mostly about reps and a few specific habits.",
+    improvements: [
+      { num:"01", text:"<b>Use AI every single day, even for small things.</b> Email drafts, meeting prep, brainstorming. The reps build pattern recognition fast." },
+      { num:"02", text:"<b>Start verifying before you trust.</b> Any specific fact, date, or name — check it. This single habit prevents the most common AI failures." },
+      { num:"03", text:"<b>Practice writing better prompts.</b> Add context, audience, length, and tone. Vague in equals vague out — every time." },
+      { num:"04", text:"<b>Learn what data not to paste.</b> Confidential client info, financial details, anything under NDA. Default to your company's approved tool, not a free chatbot." },
+      { num:"05", text:"<b>Take one structured course this quarter.</b> Elements of AI, Google AI Essentials, or HBS Online AI for Leaders. Pick one, finish it." },
+    ]
+  },
+  builder: {
+    name: "Builder",
+    icon: "⚡",
+    tagline: "You're operating with intent — keep building.",
+    blurb: "You use AI regularly, your prompts are specific, and you've moved past one-shot questions into real work. You're a Builder. The next move is depth: refined workflows, reusable prompts, and being the person on your team others ask for help.",
+    improvements: [
+      { num:"01", text:"<b>Build a personal prompt library.</b> Save the prompts that work. A simple Notes doc or Notion page beats reinventing the wheel every time." },
+      { num:"02", text:"<b>Move from one-shot to multi-turn.</b> Stop expecting perfect first responses. Refine, push back, ask for alternatives. The best output comes from iteration." },
+      { num:"03", text:"<b>Redesign at least one of your workflows.</b> Pick a recurring task (reports, briefs, analysis) and rebuild it with AI as a core step, not an afterthought." },
+      { num:"04", text:"<b>Develop a real point of view on AI's limits.</b> Know what it's bad at, where it hallucinates, when to override it. That judgment is what separates Builders from Operators." },
+      { num:"05", text:"<b>Start sharing what you know.</b> Help a colleague, write a short internal doc, or run an informal lunch-and-learn. Teaching forces clarity." },
+    ]
+  },
+  operator: {
+    name: "Operator",
+    icon: "🚀",
+    tagline: "You're shaping how others work with AI.",
+    blurb: "You've moved beyond personal use. You're redesigning workflows, teaching others, and thinking about governance. You're an Operator. The work from here isn't more reps — it's leverage. Building systems, setting policy, and shaping how your organization adopts AI.",
+    improvements: [
+      { num:"01", text:"<b>Set governance, not just guidance.</b> Move from suggesting practices to documenting policy — what's allowed, what isn't, how decisions get made when AI is involved." },
+      { num:"02", text:"<b>Lead AI fluency for your team or function.</b> Don't wait for L&D to design something. Build a curriculum that matches the actual work your team does." },
+      { num:"03", text:"<b>Audit for bias and unintended consequences.</b> Especially in hiring, performance, or anything touching people. AI inherits the bias in its training data — your job is to catch it before it scales." },
+      { num:"04", text:"<b>Make the business case to leadership.</b> Translate your technical fluency into ROI, risk, and strategic positioning. This is what gets you invited into the room where AI strategy is set." },
+      { num:"05", text:"<b>Build something publicly.</b> A framework, a diagnostic, a written POV. Operators with public artifacts move faster — into bigger roles, better comp, and the conversations that matter." },
+    ]
+  }
+};
+
+let current = 0;
+let answers = [];
+let selected = null;
+
+function buildPips(){
+  const p = document.getElementById('progress');
+  p.innerHTML = '';
+  QUESTIONS.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className = 'pip' + (i<current?' done':'') + (i===current?' active':'');
+    p.appendChild(d);
+  });
+}
+
+function start(){
+  document.getElementById('screen-start').classList.add('hidden');
+  document.getElementById('screen-question').classList.remove('hidden');
+  document.getElementById('q-total').textContent = QUESTIONS.length;
+  current = 0;
+  answers = [];
+  renderQuestion();
+}
+
+function renderQuestion(){
+  selected = null;
+  buildPips();
+  const q = QUESTIONS[current];
+  document.getElementById('q-label').textContent = q.label;
+  document.getElementById('q-prompt').textContent = q.prompt;
+  document.getElementById('q-current').textContent = current + 1;
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.options.forEach((o,i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="key">${o.key}</span><span>${o.text}</span>`;
+    b.onclick = ()=>choose(i, b);
+    opts.appendChild(b);
+  });
+
+  document.getElementById('next-btn').classList.add('hidden');
+  const isLast = current === QUESTIONS.length-1;
+  document.getElementById('next-btn').innerHTML = (isLast ? 'See Result' : 'Next') + ` <span class="arr">${isLast ? '◆' : '→'}</span>`;
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function choose(i, btn){
+  selected = i;
+  document.querySelectorAll('.opt').forEach(el => el.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function nextQuestion(){
+  if(selected === null) return;
+  answers[current] = QUESTIONS[current].options[selected].points;
+  current++;
+  if(current >= QUESTIONS.length){ showResult(); return; }
+  renderQuestion();
+}
+
+function showResult(){
+  document.getElementById('screen-question').classList.add('hidden');
+  const rs = document.getElementById('screen-result');
+  rs.classList.remove('hidden');
+
+  const total = answers.reduce((sum, p) => sum + p, 0);
+  // Max possible = 7 questions × 3 points = 21
+  // Foundation: 0-9 | Builder: 10-15 | Operator: 16-21
+  let tierKey;
+  if(total <= 9) tierKey = 'foundation';
+  else if(total <= 15) tierKey = 'builder';
+  else tierKey = 'operator';
+
+  const tier = TIERS[tierKey];
+  document.getElementById('result-icon').textContent = tier.icon;
+  document.getElementById('result-name').textContent = tier.name;
+  document.getElementById('result-tagline').textContent = tier.tagline;
+  document.getElementById('result-blurb').textContent = tier.blurb;
+
+  const list = document.getElementById('improve-list');
+  list.innerHTML = '';
+  tier.improvements.forEach(imp => {
+    const div = document.createElement('div');
+    div.className = 'improve-item';
+    div.innerHTML = `<span class="improve-num">${imp.num}</span><span class="improve-text">${imp.text}</span>`;
+    list.appendChild(div);
+  });
+
+  // fill all pips
+  current = QUESTIONS.length;
+  buildPips();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function shareResult(){
+  const tierName = document.getElementById('result-name').textContent;
+  const text = `I'm a ${tierName} on the Readi AI Readiness Diagnostic. Find your tier:`;
+  if(navigator.share){
+    navigator.share({title:'Readi', text:text, url:window.location.href}).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(`${text} ${window.location.href}`);
+    const btns = document.querySelectorAll('.btn.ghost');
+    btns.forEach(b=>{
+      const orig = b.innerHTML;
+      b.innerHTML = 'Copied <span class="arr">✓</span>';
+      setTimeout(()=>{ b.innerHTML = orig; }, 2000);
+    });
+  }
+}
+
+function restart(){
+  current = 0;
+  answers = [];
+  selected = null;
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-start').classList.remove('hidden');
+  buildPips();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+buildPips();
+</script>
+</body>
+</html>
