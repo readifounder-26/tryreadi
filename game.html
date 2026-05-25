@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI READY // Field Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0c0e;
+    --bg-2:#16161a;
+    --ink:#f3ecdf;
+    --ink-dim:#8a857a;
+    --line:#26262c;
+    --accent:#d4ff3f;
+    --warn:#ff5a36;
+    --ok:#7cf2c0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Fraunces',Georgia,serif;
+    font-feature-settings:"ss01","ss02";
+    position:relative;
+    min-height:100vh;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 3px);
+    mix-blend-mode:overlay;
+  }
+  body::after{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(ellipse at 50% 0%,rgba(212,255,63,.06),transparent 60%),
+               radial-gradient(ellipse at 80% 100%,rgba(255,90,54,.04),transparent 50%);
+  }
+
+  .stage{
+    position:relative;z-index:3;
+    min-height:100vh;
+    display:flex;flex-direction:column;
+    max-width:680px;margin:0 auto;
+    padding:18px 22px 36px;
+  }
+
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-dim);
+    padding-bottom:14px;border-bottom:1px solid var(--line);
+  }
+  .topbar .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:8px;box-shadow:0 0 10px var(--accent)}
+  .progress{display:flex;gap:4px}
+  .pip{width:18px;height:3px;background:var(--line);border-radius:2px}
+  .pip.done{background:var(--ink)}
+  .pip.active{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+
+  .screen{flex:1;display:flex;flex-direction:column;justify-content:center;animation:fadeUp .5s ease both;padding:24px 0}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  .title{
+    font-weight:900;font-size:clamp(46px,11vw,84px);line-height:.92;letter-spacing:-.03em;
+    margin-bottom:18px;
+  }
+  .title em{font-style:italic;font-weight:500;color:var(--accent)}
+  .tag{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-dim);margin-bottom:26px;
+  }
+  .lede{font-size:17px;line-height:1.5;color:var(--ink);opacity:.85;max-width:46ch;margin-bottom:32px;font-weight:300}
+  .meta-row{
+    display:flex;gap:18px;margin-bottom:34px;flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);
+  }
+  .meta-row span b{color:var(--ink);font-weight:500;margin-right:6px}
+
+  .btn{
+    appearance:none;border:none;cursor:pointer;
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;
+    padding:18px 22px;border-radius:4px;
+    background:var(--accent);color:#0a0a0a;
+    display:inline-flex;align-items:center;justify-content:space-between;gap:18px;
+    transition:transform .15s ease,filter .15s ease;
+    width:fit-content;
+  }
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.05)}
+  .btn:active{transform:translateY(0)}
+  .btn .arr{font-size:18px;line-height:1}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:var(--ink)}
+
+  .round-label{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:14px;
+  }
+  .prompt{
+    font-size:clamp(22px,4.5vw,30px);line-height:1.2;font-weight:500;letter-spacing:-.01em;
+    margin-bottom:20px;
+  }
+  .prompt em{font-style:italic;color:var(--accent);font-weight:500}
+
+  .exhibit{
+    background:var(--bg-2);border:1px solid var(--line);border-left:2px solid var(--accent);
+    padding:16px 18px;border-radius:3px;margin-bottom:20px;
+    font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.55;color:var(--ink);
+    max-height:38vh;overflow-y:auto;
+  }
+  .exhibit .label{
+    display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px;
+  }
+
+  .options{display:flex;flex-direction:column;gap:9px;margin-bottom:14px}
+  .opt{
+    appearance:none;border:1px solid var(--line);background:transparent;color:var(--ink);
+    text-align:left;padding:14px 16px;border-radius:3px;cursor:pointer;
+    font-family:'Fraunces',serif;font-size:15.5px;line-height:1.35;
+    display:flex;align-items:flex-start;gap:12px;
+    transition:border-color .15s,background .15s,transform .1s;
+  }
+  .opt:hover{border-color:var(--ink);background:rgba(255,255,255,.02)}
+  .opt .key{
+    font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;
+    color:var(--ink-dim);background:var(--line);padding:3px 7px;border-radius:2px;flex-shrink:0;margin-top:2px;
+  }
+  .opt.correct{border-color:var(--accent);background:rgba(212,255,63,.07)}
+  .opt.correct .key{background:var(--accent);color:#0a0a0a}
+  .opt.wrong{border-color:var(--warn);background:rgba(255,90,54,.06);opacity:.75}
+  .opt.wrong .key{background:var(--warn);color:#fff}
+  .opt:disabled{cursor:default}
+
+  .feedback{
+    margin-top:6px;padding:16px 18px;border-radius:3px;
+    background:var(--bg-2);border:1px solid var(--line);
+    animation:fadeUp .35s ease both;
+  }
+  .feedback .verdict{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .feedback.correct .verdict{color:var(--accent)}
+  .feedback.wrong .verdict{color:var(--warn)}
+  .feedback p{font-size:14.5px;line-height:1.5;color:var(--ink);opacity:.92;font-weight:300}
+  .feedback p + p{margin-top:8px}
+
+  .footer-row{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:14px;flex-wrap:wrap}
+  .score-display{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim)}
+  .score-display b{color:var(--ink);font-weight:700}
+
+  .result-stat{
+    font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px;
+  }
+  .result-score{
+    font-weight:900;font-size:clamp(72px,18vw,140px);line-height:.9;letter-spacing:-.04em;
+    color:var(--accent);margin-bottom:8px;
+  }
+  .result-tier{
+    font-style:italic;font-weight:500;font-size:clamp(26px,5vw,34px);margin-bottom:18px;line-height:1.1;
+  }
+  .result-blurb{font-size:16px;line-height:1.55;opacity:.85;font-weight:300;margin-bottom:24px;max-width:48ch}
+
+  .section-head{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-dim);margin-bottom:14px;padding-top:20px;border-top:1px solid var(--line);
+    display:flex;align-items:center;gap:8px;
+  }
+  .section-head::before{content:"";width:14px;height:1px;background:var(--accent)}
+
+  .takeaways{display:grid;gap:12px;margin-bottom:8px}
+  .ta{
+    display:flex;gap:14px;align-items:flex-start;
+    font-size:14px;line-height:1.45;font-weight:300;
+  }
+  .ta .num{
+    font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;
+    color:var(--accent);background:rgba(212,255,63,.1);padding:4px 7px;border-radius:2px;flex-shrink:0;
+  }
+  .ta b{font-weight:500;color:var(--ink)}
+
+  .resources{display:grid;gap:10px;margin-bottom:8px}
+  .res{
+    display:block;text-decoration:none;color:inherit;
+    background:var(--bg-2);border:1px solid var(--line);
+    padding:14px 16px;border-radius:3px;
+    transition:border-color .15s,transform .12s,background .15s;
+  }
+  .res:hover{border-color:var(--accent);transform:translateX(2px);background:rgba(212,255,63,.03)}
+  .res-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:4px}
+  .res-name{font-weight:500;font-size:16px;letter-spacing:-.005em}
+  .res-meta{
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-dim);white-space:nowrap;
+  }
+  .res-desc{font-size:13.5px;line-height:1.4;opacity:.78;font-weight:300}
+  .res .arr{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:13px;margin-left:6px}
+
+  .result-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+  .hidden{display:none !important}
+
+  @media (max-width:480px){
+    .stage{padding:14px 16px 28px}
+    .pip{width:14px}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="topbar">
+    <div><span class="dot"></span> AI READY · v0.2</div>
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <!-- START -->
+  <section class="screen" id="screen-start">
+    <div class="tag">// Field Assessment Protocol</div>
+    <h1 class="title">Are you<br><em>AI ready?</em></h1>
+    <p class="lede">Seven rapid scenarios. Real situations professionals face every day. Test whether you can spot AI writing, prompt well, verify outputs, protect data, and lead through change.</p>
+    <div class="meta-row">
+      <span><b>07</b> Rounds</span>
+      <span><b>~7</b> Min</span>
+      <span><b>00</b> Lectures</span>
+    </div>
+    <button class="btn" onclick="start()">Begin Assessment <span class="arr">→</span></button>
+  </section>
+
+  <!-- ROUND -->
+  <section class="screen hidden" id="screen-round">
+    <div class="round-label" id="round-label"></div>
+    <h2 class="prompt" id="prompt"></h2>
+    <div class="exhibit hidden" id="exhibit"></div>
+    <div class="options" id="options"></div>
+    <div class="feedback hidden" id="feedback"></div>
+    <div class="footer-row">
+      <div class="score-display">Score · <b id="score-now">0</b> / <span id="round-max">0</span></div>
+      <button class="btn hidden" id="next-btn" onclick="nextRound()">Next <span class="arr">→</span></button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen hidden" id="screen-result">
+    <div class="result-stat">// Assessment Complete</div>
+    <div class="result-score" id="result-score">0</div>
+    <div class="result-tier" id="result-tier"></div>
+    <p class="result-blurb" id="result-blurb"></p>
+
+    <div class="section-head">Key Takeaways</div>
+    <div class="takeaways" id="takeaways"></div>
+
+    <div class="section-head">Continue Your Learning</div>
+    <div class="resources" id="resources"></div>
+
+    <div class="result-actions">
+      <button class="btn" onclick="restart()">Run Again <span class="arr">↻</span></button>
+      <button class="btn ghost" onclick="shareResult()">Share Score <span class="arr">↗</span></button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const ROUNDS = [
+  {
+    label: "Round 01 · Detection",
+    prompt: "Was this written by a human or an AI?",
+    exhibit: {
+      label: "Excerpt · Internal memo",
+      text: `"In conclusion, while there are many factors to consider, it's important to recognize that this issue is multifaceted. Both perspectives offer valuable insights, and navigating this complex landscape requires a balanced approach. Ultimately, by leveraging diverse viewpoints, we can unlock meaningful outcomes."`
+    },
+    options: [
+      { key:"A", text:"Written by a human", correct:false },
+      { key:"B", text:"Written by an AI", correct:true },
+    ],
+    explain: {
+      correct: "Classic AI tells: <b>'multifaceted,' 'navigating this complex landscape,' 'leveraging,' 'unlock meaningful outcomes'</b> — plus a hedged, perfectly balanced non-conclusion. Most AI text is detectable not by error but by texture: smooth, generic, allergic to taking a position.",
+      wrong: "It's AI. The giveaways aren't grammar — they're texture. Watch for <b>'multifaceted,' 'navigating,' 'leveraging,'</b> and the move where it acknowledges 'both perspectives' without ever taking one."
+    }
+  },
+  {
+    label: "Round 02 · Verification",
+    prompt: "AI gives you this. What do you do?",
+    exhibit: {
+      label: "AI response · Your query: persistent headaches",
+      text: `"For your recurring headaches, you're likely experiencing tension headaches. I'd recommend taking 400mg ibuprofen every 6 hours, applying a warm compress, and reducing screen time. If they persist beyond a week, consider sumatriptan as a stronger option."`
+    },
+    options: [
+      { key:"A", text:"Follow it — sounds reasonable and specific", correct:false },
+      { key:"B", text:"Use it as a starting point, then verify with a doctor", correct:true },
+      { key:"C", text:"Ignore it entirely — AI shouldn't touch medical stuff", correct:false },
+    ],
+    explain: {
+      correct: "The middle path is right. AI is useful for <b>orienting yourself</b> — getting vocabulary, knowing what to ask — but it doesn't know your history, can't examine you, and confidently recommends prescription drugs (sumatriptan) it has no business prescribing. Use it to prepare, then talk to a professional.",
+      wrong: "Following AI medical advice directly is risky — it has no access to your history and just confidently recommended a prescription drug. But total rejection wastes a useful research tool. The right move is <b>orient with AI, decide with a doctor</b>."
+    }
+  },
+  {
+    label: "Round 03 · Prompting",
+    prompt: "You need a marketing email. Which prompt gets better output?",
+    options: [
+      { key:"A", text:"\"Write me a marketing email for my business.\"", correct:false },
+      { key:"B", text:"\"Write a 100-word email announcing our bakery's Saturday opening to local families. Warm, conversational. Mention our sourdough starter is 40 years old. End with a free-bread-for-first-50 offer.\"", correct:true },
+    ],
+    explain: {
+      correct: "Specificity is the whole game. <b>B</b> gives the model audience, length, tone, a concrete detail to anchor on (40-year-old starter), and a clear call to action. <b>A</b> forces the AI to invent all of that — and it'll invent it generically.",
+      wrong: "<b>B</b> is better — by a lot. Good prompts give the model what it can't guess: audience, length, tone, a specific detail to anchor on, and the action you want. Vague prompts get vague output. Always."
+    }
+  },
+  {
+    label: "Round 04 · Data Hygiene",
+    prompt: "Your manager asks you to summarize a confidential client contract using AI. What's the move?",
+    options: [
+      { key:"A", text:"Paste the full contract into a free public chatbot", correct:false },
+      { key:"B", text:"Use your company's approved enterprise AI tool", correct:true },
+      { key:"C", text:"Refuse — AI is too risky for any work data", correct:false },
+    ],
+    explain: {
+      correct: "Free public tools may log, retain, or train on whatever you paste — including client names, dollar figures, and terms. Enterprise tools come with <b>data processing agreements, no-training guarantees, and access controls</b>. Same capability, no leak.",
+      wrong: "Pasting confidential client data into a free public chatbot can violate contracts, regulations, and trust — that data may be retained or used in training. But refusing entirely is overcorrecting. Use <b>your org's approved tool</b> — same AI power, with the legal scaffolding in place."
+    }
+  },
+  {
+    label: "Round 05 · Hallucination",
+    prompt: "Spot the error in this AI response.",
+    exhibit: {
+      label: "AI response · Your query: tell me about Australia's capital",
+      text: `"The capital of Australia is Sydney, located on the country's southeast coast. It became the capital in 1901 when Australia gained federation, and today it's home to the Sydney Opera House and Parliament House."`
+    },
+    options: [
+      { key:"A", text:"Nothing — this looks accurate", correct:false },
+      { key:"B", text:"The date is wrong", correct:false },
+      { key:"C", text:"The capital is wrong — it's Canberra", correct:true },
+      { key:"D", text:"The Opera House isn't in the capital", correct:false },
+    ],
+    explain: {
+      correct: "Canberra is the capital — chosen in 1908 specifically as a compromise between Sydney and Melbourne. This is a <b>textbook hallucination</b>: confident, fluent, plausible, completely wrong. The Opera House detail and the 1901 date are real but get smuggled in to make the false claim feel solid.",
+      wrong: "The capital is <b>Canberra</b>, not Sydney — picked in 1908 as a compromise between Sydney and Melbourne. This is the dangerous kind of hallucination: confident, fluent, surrounded by real facts (1901 federation, Opera House) that camouflage the wrong claim."
+    }
+  },
+  {
+    label: "Round 06 · Bias & Fairness",
+    prompt: "Your team uses AI to screen resumes. After 3 months, 80% of shortlisted candidates are men, though applicants are 50/50. What's most likely happening?",
+    options: [
+      { key:"A", text:"The men were genuinely more qualified", correct:false },
+      { key:"B", text:"The AI is trained on past hiring data that reflects historical bias", correct:true },
+      { key:"C", text:"The AI is broken and should be replaced", correct:false },
+      { key:"D", text:"It's a coincidence — small sample size", correct:false },
+    ],
+    explain: {
+      correct: "AI screening tools learn from <b>past hiring decisions</b>. If your industry historically hired more men, the model treats 'looks like a past hire' as 'qualified' — and quietly replicates the bias at scale. The fix isn't to scrap the AI; it's to <b>audit the training data, monitor outcomes by demographic, and add human review at decision points</b>. Amazon famously killed an internal resume tool for exactly this reason in 2018.",
+      wrong: "The answer is <b>B</b>. AI screening tools learn from past hiring decisions — and if those decisions were biased, the AI replicates the bias at scale, with the false credibility of being 'objective.' This is one of the most documented failure modes in workplace AI. The fix: audit training data, monitor outcomes by demographic, keep humans in the loop on final calls."
+    }
+  },
+  {
+    label: "Round 07 · Leading Through AI",
+    prompt: "You're rolling out AI tools to your team. Half are excited, half are scared they'll be replaced. Best first move?",
+    options: [
+      { key:"A", text:"Mandate adoption with deadlines — rip the bandaid off", correct:false },
+      { key:"B", text:"Let people opt in voluntarily and see who adopts", correct:false },
+      { key:"C", text:"Be explicit about what AI will and won't change about their roles, then train everyone together", correct:true },
+      { key:"D", text:"Quietly phase it in without making a big deal", correct:false },
+    ],
+    explain: {
+      correct: "Fear of job loss is the single biggest blocker to AI adoption — and it doesn't go away by ignoring it or moving fast. <b>Clarity beats reassurance</b>. People can handle hard truths ('this will change how we do X, here's what stays human') better than vague promises. Training everyone together — skeptics included — signals that AI fluency is a baseline expectation, not a reward for enthusiasts. This is where people leadership actually shows up.",
+      wrong: "The right answer is <b>C</b>. Mandates breed resentment, opt-in creates two-tier teams, and quiet rollouts make people feel something is being done <i>to</i> them. <b>Clarity beats reassurance</b>: name what's changing, what's not, and train everyone together. Fear of replacement is the #1 adoption blocker — you address it directly or it sabotages everything else."
+    }
+  },
+];
+
+const TAKEAWAYS = [
+  { n:"01", t:"<b>Texture beats grammar.</b> Spot AI writing by hedge-words and generic abstraction, not typos." },
+  { n:"02", t:"<b>Orient with AI, decide with humans</b> — especially in medicine, law, and finance." },
+  { n:"03", t:"<b>Prompts need specifics:</b> audience, length, tone, one concrete anchor detail." },
+  { n:"04", t:"<b>Confidential data needs an enterprise tool</b> — free chatbots can retain what you paste." },
+  { n:"05", t:"<b>Hallucinations look plausible.</b> Verify any specific claim before you act or share." },
+  { n:"06", t:"<b>AI inherits the bias in its training data.</b> Audit outcomes, not just intent." },
+  { n:"07", t:"<b>Lead AI change with clarity, not mandates.</b> Name what changes, train everyone together." },
+];
+
+const RESOURCES = [
+  {
+    name: "Elements of AI",
+    meta: "Free Course · 30 hrs",
+    desc: "University of Helsinki's free intro to AI. Non-technical, widely respected, used by governments for workforce AI literacy.",
+    url: "https://www.elementsofai.com"
+  },
+  {
+    name: "Anthropic's Prompt Engineering Guide",
+    meta: "Docs · Self-paced",
+    desc: "The cleanest official guide to writing better prompts. Worth reading even if you don't use Claude.",
+    url: "https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview"
+  },
+  {
+    name: "Google AI Essentials",
+    meta: "Coursera · ~10 hrs",
+    desc: "Practical, role-agnostic intro to using AI at work. Good follow-on if you scored 4 or 5 on this assessment.",
+    url: "https://www.coursera.org/learn/google-ai-essentials"
+  },
+  {
+    name: "AI Snake Oil",
+    meta: "Book + Newsletter",
+    desc: "Princeton researchers cutting through hype on what AI can and can't actually do. Critical reading for leaders.",
+    url: "https://www.aisnakeoil.com"
+  },
+  {
+    name: "MIT Sloan · AI & Workforce",
+    meta: "Research · Free",
+    desc: "Ongoing research on how AI is reshaping work, roles, and organizations. Sharp source for people leaders.",
+    url: "https://mitsloan.mit.edu/ideas-made-to-matter/topic/artificial-intelligence"
+  },
+  {
+    name: "Ethan Mollick · One Useful Thing",
+    meta: "Newsletter · Free",
+    desc: "Wharton professor's weekly notes on practical AI use. Excellent signal-to-noise ratio.",
+    url: "https://www.oneusefulthing.org"
+  },
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function buildPips(){
+  const p = document.getElementById('progress');
+  p.innerHTML = '';
+  ROUNDS.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className = 'pip' + (i<current?' done':'') + (i===current?' active':'');
+    p.appendChild(d);
+  });
+}
+
+function start(){
+  document.getElementById('screen-start').classList.add('hidden');
+  document.getElementById('screen-round').classList.remove('hidden');
+  document.getElementById('round-max').textContent = ROUNDS.length;
+  renderRound();
+}
+
+function renderRound(){
+  answered = false;
+  buildPips();
+  const r = ROUNDS[current];
+  document.getElementById('round-label').textContent = r.label;
+  document.getElementById('prompt').innerHTML = r.prompt;
+
+  const ex = document.getElementById('exhibit');
+  if(r.exhibit){
+    ex.classList.remove('hidden');
+    ex.innerHTML = `<span class="label">${r.exhibit.label}</span>${r.exhibit.text}`;
+  } else {
+    ex.classList.add('hidden');
+    ex.innerHTML = '';
+  }
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  r.options.forEach((o,i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt';
+    b.innerHTML = `<span class="key">${o.key}</span><span>${o.text}</span>`;
+    b.onclick = ()=>choose(i,b);
+    opts.appendChild(b);
+  });
+
+  document.getElementById('feedback').classList.add('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+  document.getElementById('score-now').textContent = score;
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function choose(i, btn){
+  if(answered) return;
+  answered = true;
+  const r = ROUNDS[current];
+  const correct = r.options[i].correct;
+
+  document.querySelectorAll('.opt').forEach((el,idx)=>{
+    el.disabled = true;
+    if(r.options[idx].correct) el.classList.add('correct');
+    else if(idx===i) el.classList.add('wrong');
+  });
+
+  if(correct) score++;
+  document.getElementById('score-now').textContent = score;
+
+  const fb = document.getElementById('feedback');
+  fb.classList.remove('hidden','correct','wrong');
+  fb.classList.add(correct ? 'correct' : 'wrong');
+  fb.innerHTML = `
+    <div class="verdict">${correct ? '◆ Correct' : '◇ Not quite'}</div>
+    <p>${correct ? r.explain.correct : r.explain.wrong}</p>
+  `;
+
+  const nb = document.getElementById('next-btn');
+  nb.classList.remove('hidden');
+  const isLast = current === ROUNDS.length-1;
+  nb.innerHTML = (isLast ? 'See Results' : 'Next') + ` <span class="arr">${isLast ? '◆' : '→'}</span>`;
+}
+
+function nextRound(){
+  current++;
+  if(current >= ROUNDS.length){ showResult(); return; }
+  renderRound();
+}
+
+function showResult(){
+  document.getElementById('screen-round').classList.add('hidden');
+  const rs = document.getElementById('screen-result');
+  rs.classList.remove('hidden');
+
+  document.getElementById('result-score').textContent = `${score}/${ROUNDS.length}`;
+
+  const tiers = [
+    { min:7, tier:"AI Native.", blurb:"Top tier. You handle AI like a pro — skeptical where it counts, specific when you prompt, careful with data, and clear-eyed about its impact on people. You'd train others well." },
+    { min:6, tier:"Operating Confidently.", blurb:"Strong instincts across the board. Sharpen one or two areas and you're at the leadership tier — the resources below will get you there fast." },
+    { min:4, tier:"On the Way Up.", blurb:"You see the shape of AI work clearly. A few sharper habits around verification, data hygiene, or leading change will move you up fast." },
+    { min:2, tier:"Building Foundation.", blurb:"You're using AI but not yet steering it. Biggest gains live in being more specific, trusting less, and thinking about second-order effects on people." },
+    { min:0, tier:"Ground Floor.", blurb:"Good news — the gap between here and competent is mostly habits, not knowledge. Start with the takeaways above and the first two resources below." },
+  ];
+  const t = tiers.find(x => score >= x.min);
+  document.getElementById('result-tier').textContent = t.tier;
+  document.getElementById('result-blurb').textContent = t.blurb;
+
+  const tk = document.getElementById('takeaways');
+  tk.innerHTML = '';
+  TAKEAWAYS.forEach(ta=>{
+    const d = document.createElement('div');
+    d.className = 'ta';
+    d.innerHTML = `<span class="num">${ta.n}</span><span>${ta.t}</span>`;
+    tk.appendChild(d);
+  });
+
+  const rc = document.getElementById('resources');
+  rc.innerHTML = '';
+  RESOURCES.forEach(r=>{
+    const a = document.createElement('a');
+    a.className = 'res';
+    a.href = r.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.innerHTML = `
+      <div class="res-head">
+        <div class="res-name">${r.name} <span class="arr">↗</span></div>
+        <div class="res-meta">${r.meta}</div>
+      </div>
+      <div class="res-desc">${r.desc}</div>
+    `;
+    rc.appendChild(a);
+  });
+
+  current = ROUNDS.length;
+  buildPips();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function shareResult(){
+  const text = `I scored ${score}/${ROUNDS.length} on the AI Ready Field Assessment. Try it:`;
+  if(navigator.share){
+    navigator.share({title:'AI Ready', text:text, url:window.location.href}).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(`${text} ${window.location.href}`);
+    const btns = document.querySelectorAll('.btn.ghost');
+    btns.forEach(b=>{
+      const orig = b.innerHTML;
+      b.innerHTML = 'Copied to clipboard <span class="arr">✓</span>';
+      setTimeout(()=>{ b.innerHTML = orig; }, 2000);
+    });
+  }
+}
+
+function restart(){
+  current = 0; score = 0; answered = false;
+  document.getElementById('screen-result').classList.add('hidden');
+  document.getElementById('screen-start').classList.remove('hidden');
+  buildPips();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+buildPips();
+</script>
+</body>
+</html>
