@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    background: #080808;
+  }
+  .wrap {
+    width: 1200px;
+    height: 630px;
+    background: #080808;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    position: relative;
+  }
+
+  /* Green glow blob bottom */
+  .glow {
+    position: absolute;
+    bottom: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 300px;
+    background: radial-gradient(ellipse at center, rgba(132,204,22,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Subtle grid texture */
+  .grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(132,204,22,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(132,204,22,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: flex-end;
+    position: relative;
+    z-index: 2;
+  }
+
+  .logo-text {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 130px;
+    color: #ffffff;
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+
+  .dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #84cc16;
+    margin-left: 6px;
+    margin-bottom: 22px;
+    flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(132,204,22,0.6);
+  }
+
+  .tagline {
+    font-family: 'Helvetica Neue', Helvetica, sans-serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 2;
+  }
+
+  .tagline em {
+    color: #84cc16;
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  .url {
+    position: absolute;
+    bottom: 32px;
+    right: 52px;
+    font-family: 'Helvetica Neue', Helvetica, sans-serif;
+    font-size: 16px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 2px;
+    z-index: 2;
+  }
+
+  /* Corner accents */
+  .corner {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    z-index: 2;
+  }
+  .corner.tl { top: 32px; left: 32px; border-top: 2px solid rgba(132,204,22,0.4); border-left: 2px solid rgba(132,204,22,0.4); }
+  .corner.tr { top: 32px; right: 32px; border-top: 2px solid rgba(132,204,22,0.4); border-right: 2px solid rgba(132,204,22,0.4); }
+  .corner.bl { bottom: 32px; left: 32px; border-bottom: 2px solid rgba(132,204,22,0.4); border-left: 2px solid rgba(132,204,22,0.4); }
+  .corner.br { bottom: 32px; right: 32px; border-bottom: 2px solid rgba(132,204,22,0.4); border-right: 2px solid rgba(132,204,22,0.4); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="grid"></div>
+  <div class="glow"></div>
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <div class="logo-row">
+    <span class="logo-text">readi</span>
+    <div class="dot"></div>
+  </div>
+  <div class="tagline">AI Readiness, <em>Measured.</em></div>
+  <div class="url">tryreadi.com</div>
+</div>
+</body>
+</html>
