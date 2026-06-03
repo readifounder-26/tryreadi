@@ -190,8 +190,24 @@
   .result-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
 
   .hidden{display:none !important}
-
-  @media (max-width:480px){
+/* BADGE */
+.badge-section{
+  margin-top:32px;padding-top:28px;border-top:1px solid var(--line);
+  display:flex;flex-direction:column;align-items:flex-start;gap:18px;
+}
+.badge-label{
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--ink-dim);
+  display:flex;align-items:center;gap:8px;
+}
+.badge-label::before{content:"";width:14px;height:1px;background:var(--accent)}
+.badge-img{
+  width:240px;height:240px;object-fit:contain;border-radius:8px;
+  box-shadow:0 0 40px rgba(212,255,63,.12);
+}
+.badge-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn.linkedin{background:#0A66C2;color:#fff}
+.btn.linkedin:hover{filter:brightness(1.1)}  @media (max-width:480px){
     .stage{padding:14px 16px 28px}
     .pip{width:14px}
   }
@@ -266,10 +282,15 @@
     <div class="improve-head">How to level up from here</div>
     <div class="improve-list" id="improve-list"></div>
 
-    <div class="result-actions">
-      <button class="btn" onclick="restart()">Retake <span class="arr">↻</span></button>
-      <button class="btn ghost" onclick="shareResult()">Share <span class="arr">↗</span></button>
-    </div>
+    <div class="badge-section">   <div class="badge-label">Your Readi Badge</div>    <img id="tier-badge" class="badge-img" src="" alt="Readi Tier Badge" />
+  <div class="badge-actions">
+    <button class="btn" onclick="downloadBadge()">Download Badge <span class="arr">↓</span></button>
+    <button class="btn linkedin" onclick="shareLinkedIn()">Share on LinkedIn <span class="arr">↗</span></button>
+  </div>
+</div>
+<div class="result-actions" style="margin-top:16px">
+  <button class="btn ghost" onclick="restart()">Retake <span class="arr">↻</span></button>
+</div>
   </section>
 
 </div>
@@ -471,7 +492,9 @@ function showResult(){
   document.getElementById('result-name').textContent = tier.name;
   document.getElementById('result-tagline').textContent = tier.tagline;
   document.getElementById('result-blurb').textContent = tier.blurb;
-
+  const badgeImg = document.getElementById('tier-badge');
+badgeImg.src = `/readi-badge-${tierKey}.png`;
+badgeImg.alt = `Readi ${tier.name} Badge`;
   const list = document.getElementById('improve-list');
   list.innerHTML = '';
   tier.improvements.forEach(imp => {
@@ -514,6 +537,18 @@ function restart(){
 }
 
 buildPips();
-</script>
+function downloadBadge() {
+const tierKey = document.getElementById('result-name').textContent.toLowerCase();
+const a = document.createElement('a');
+a.href = `/readi-badge-${tierKey}.png`;
+a.download = `readi-badge-${tierKey}.png`;
+a.click();
+}
+
+function shareLinkedIn() {
+const tierName = document.getElementById('result-name').textContent;
+const text = encodeURIComponent(`I just took the Readi AI Readiness Diagnostic and I'm a ${tierName}.\n\nReady is a myth. Readi is a practice.\n\nFind your tier → https://www.tryreadi.com`);
+window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${text}`, '_blank');
+}/script>
 </body>
 </html>
